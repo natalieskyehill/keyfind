@@ -1,0 +1,96 @@
+<%
+from bottle import request
+
+class Finder(object):
+    def __init__(self):
+        object.__init__(self)
+        self.noteValues = ["A", "B FLAT", "B", "C", "D FLAT", "D", "E FLAT", "E", "F", "G FLAT", "G", "A FLAT"]
+        self.noteKeyRealNames = ["A", "A#/Bb", "B", "C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab"]
+        self.notesInKey = []
+        self.notesToCheck = []
+        self.allPossibleKeys = [0,0,0,0,0,0,0,0,0,0,0,0]
+
+        self.keys = (    ("A", "B", "D FLAT", "D", "E", "G FLAT", "A FLAT"),
+            ("A", "B FLAT", "C", "D", "E FLAT", "F", "G"),
+            ("B FLAT", "B", "D FLAT", "E FLAT", "E", "G FLAT", "A FLAT"),
+            ("A", "B", "C", "D", "E", "F", "G"),
+            ("B FLAT", "C", "D FLAT", "E FLAT", "F", "G FLAT", "A FLAT"),
+            ("A", "B", "D FLAT", "D", "E", "G FLAT", "G"),
+            ("B FLAT", "C", "D", "E FLAT", "F", "G", "A FLAT"),
+            ("A", "B", "D FLAT", "E FLAT", "E", "G FLAT", "A FLAT"),
+            ("A", "B FLAT", "C", "D", "E", "F", "G") ,
+            ("B FLAT", "B", "D FLAT", "E FLAT", "F", "G FLAT", "A FLAT"),
+            ("A", "B", "C", "D", "E", "G FLAT", "G"),
+            ("B FLAT", "C", "D FLAT", "E FLAT", "F", "G", "A FLAT")
+        )
+        self.result = []
+    end
+
+    def getFromForm(self):
+        for i in range(0,12):
+            check = request.forms.get("note{}".format(i))
+            if (check == self.noteValues[i]):
+                self.notesToCheck.append(check)
+                self.notesInKey.append(self.noteKeyRealNames[i])
+            end
+        end
+    end
+
+    def checkInKeys(self):
+        for i in range(len(self.notesToCheck)):
+            self.searchNote(self.notesToCheck[i])
+        end
+    end
+
+    def searchNote(self, note):
+        for i in range(0,12):
+            if (note not in self.keys[i]):
+                self.allPossibleKeys[i] = 1
+            end
+        end
+    end
+
+    def addToResult(self):
+        for i in range(len(self.allPossibleKeys)):
+            if (self.allPossibleKeys[i] == 0):
+                self.result.append(self.noteKeyRealNames[i])
+            end
+        end
+    end
+end
+
+f = Finder()
+
+def main():
+    f.getFromForm()
+    f.checkInKeys()
+    f.addToResult()
+end
+
+main()
+
+%>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Result | KeyFind</title>
+        <link rel = "stylesheet" href = "../static/style2.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@200&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class = "main">
+        <h1>KeyFind</h1>
+        <p><b>Selected notes:</b><br> {{ ", ".join(f.notesInKey) }}</p>
+        <p><b>Possible keys:</b><br> {{ ", ".join(f.result) }}</p>
+        </div>
+    </body>
+</html>
+
+<!--Sources:-->
+<!--https://www.geeksforgeeks.org/python-program-convert-string-list/-->
+<!--https://appdividend.com/2022/05/30/python-list-contains/-->
+<!--https://itsmycode.com/typeerror-list-indices-must-be-integers-or-slices-not-tuple/-->
+<!--https://www.simplilearn.com/tutorials/python-tutorial/list-to-string-in-python-->
